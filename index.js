@@ -1,12 +1,14 @@
-const fs = require('fs');
+//import file system and chess program
+const fs = require('fs'); 
 const { Chess } = require('chess.js');
 
+//random function
 const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
 const DATASIZE = 1e6;
 
 const chess = new Chess();
-const data = fs.readFileSync('1200to1400.csv').toString().split(/\r?\n/);
+const data = fs.readFileSync('1200to1400.csv').toString().split(/\r?\n/); //splits data to an array per line
 
 console.log('Data iterations starting');
 
@@ -16,28 +18,26 @@ let outString = '';
 let invalidFens = [];
 
 for (let i = 0; i < DATASIZE; i++) {
-	const currentPgn = data[random(0, data.length)];
+	const currentPgn = data[random(0, data.length)]; //selects a random data point from the list
 	if (!currentPgn) continue;
 
 	const pgnList = currentPgn.split(/ +/);
 	const moveList = pgnList.filter(item => !item.match(/\d+\.|\d-\d/)); // remove move nums and ending status
 
-	const moveIndex = random(0, moveList.length - 1);
+	const moveIndex = random(0, moveList.length - 1); //randomly select a random length of moves
 	const currentMove = moveList[moveIndex];
 	const prevMoves = moveList.slice(0, moveIndex);
-	const nextMoves = moveList.slice(moveIndex);
 
 	let prevPgn = '';
 	for (let j in prevMoves) {
 		if (j % 2 === 0) {
-			prevPgn += (j / 2 + 1) + '. ';
+			prevPgn += (j / 2 + 1) + '. '; //inserts the move number every second move "1. e4 e5 2. d4 d5..."
 		}
 		prevPgn += prevMoves[j] + ' ';
 	}
-	prevPgn = prevPgn.trim();
+	prevPgn = prevPgn.trim(); //removes excess lines
 
 	chess.load_pgn(prevPgn);
-	//console.debug({ prevPgn, fen: chess.fen(), currentMove });
 
 	if (!chess.moves().includes(currentMove)) {
 		// Make sure the move is allowed
@@ -47,7 +47,7 @@ for (let i = 0; i < DATASIZE; i++) {
 		outString += chess.fen() + ", " + currentMove + '\n';
 	}
 
-  // Dump fens to file
+  // Dump fens to file (usage of backticks to simplify data logging)
 	if (i > 0 && i % 1000 === 0) {
 		console.log([
 			`${i} iterations complete`,
